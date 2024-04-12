@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                     Int                      @id @default(autoincrement())
+  node_id                String                   @unique
+  name                   String
+  price                  Int
+  filePath               String
+  imagePath              String
+  description            String
+  isAvaliableForPurchase Boolean
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  orders                 Order[]
+  downloadVerification   DownloaderVerification[]
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  node_id   String   @unique
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Order     Order[]
+}
+
+model Order {
+  id               Int      @id @default(autoincrement())
+  node_id          String   @unique
+  pricePaidInCents Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  userId           String
+  productId        String
+  user             User     @relation(fields: [userId], references: [node_id], onDelete: Cascade)
+  product          Product  @relation(fields: [productId], references: [node_id], onDelete: Restrict)
+}
+
+model DownloaderVerification {
+  id        Int      @id @default(autoincrement())
+  node_id   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+  productId String
+  product   Product  @relation(fields: [productId], references: [node_id], onDelete: Cascade)
+}
